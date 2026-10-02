@@ -1,0 +1,54 @@
+function Out = draw_performance_matrix_exp2(M)
+% Function to write Performance Matrix
+
+Lessthan50 = brewermap(8,'Reds');
+Lessthan50 = Lessthan50(4:8,:);
+c = brewermap(256,'*Greys');
+chancelevel = 0.5;
+
+c_blank = [124 215 220]/255*0.95; % Color for blank pixels
+
+Basisvector_RGB = [0.805397554745334,0.578851979681344,0.711879895735292;...
+    0.711955852905546,0.605882049887387,0.850334927702030;...
+    0.544613126955130,0.701317857457000,0.707390134496488;...
+    0.667580573428483,0.678788811224770,0.520956911240964;...
+    0.689256543793169,0.643916752593870,0.709533095176641];
+
+s = 50;
+edge = s*0.1;
+
+for i = 1:5
+    for k = 1:3
+        BasisVColor((i-1)*s+1:i*s,1:s,k) = vertcat(ones(edge,s),[ones(s-edge*2,edge),repmat(Basisvector_RGB(i,k),s-edge*2),ones(s-edge*2,edge)],ones(edge,s));
+    end
+end
+
+BasisVColor_T(:,:,1) = BasisVColor(:,:,1)';
+BasisVColor_T(:,:,2) = BasisVColor(:,:,2)';
+BasisVColor_T(:,:,3) = BasisVColor(:,:,3)';
+
+UpperLabel = [ones(s,s,3),BasisVColor_T,ones(s,s,3)];
+    
+for i = 1:5
+    for j = 1:5
+
+        N_M = percentage_to_n(M(i,j));
+
+        c_M = min(length(c),round((M(i,j)-chancelevel)/chancelevel*length(c))+1);
+
+        for k = 1:3
+            if i == j
+                M_Out((i-1)*s+1:i*s,(j-1)*s+1:j*s,k) = ones(s,s)*c_blank(k);
+            else
+                if N_M == 0
+                    M_Out((i-1)*s+1:i*s,(j-1)*s+1:j*s,k) = repmat(c(c_M,k),s);
+                else
+                    M_Out((i-1)*s+1:i*s,(j-1)*s+1:j*s,k) = repmat(Lessthan50(N_M,k),s);
+                end
+            end
+        end
+    end
+end
+noh = 4;
+Out = vertcat(UpperLabel,[BasisVColor,M_Out,ones(s*(noh+1),s,3)]);
+end
