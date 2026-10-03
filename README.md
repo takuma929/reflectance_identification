@@ -1,215 +1,159 @@
 # Identification of surface colours across environmental illuminations
 
-MATLAB code for the analyses, computational-observer models and figures of:
+MATLAB code and data to reproduce the figures of the manuscript *Identification
+of surface colours across environmental illuminations* (T. Morimoto and
+H. E. Smithson). Observers located the odd-one-out among four rendered objects
+shown under two environmental illuminations. Experiment 1 asked how surface
+specularity and a surrounding context affect this selection-based colour
+constancy; Experiment 2 asked what is lost when the surround no longer predicts
+the light falling on the objects. Computational observers that estimate one
+illuminant from the image and apply a diagonal correction are scored on the
+same trials.
 
-> T. Morimoto and H. E. Smithson, *Identification of surface colours across
-> environmental illuminations* (in preparation; target journal: **JOSA A**).
-
-This repository holds all of the analysis code. The stimuli and human data are
-archived separately because of their size — see **[Getting the data](#getting-the-data)**
-below. With `data/` in place, one command in MATLAB regenerates every figure in
-the paper and prints every reported statistic to the console.
+Each script in the repository root regenerates one figure from the data in
+[`data/`](data/) and writes its panels (PDF, PNG or TIFF) into `figs/`.
 
 ---
 
-## Overview
+## 1. System requirements
 
-Colour is useful for recognising objects, but the light reaching the eye
-confounds surface reflectance with the illumination. This project measures
-**selection-based colour constancy** under realistic, directionally structured
-lighting simulated with *environmental illumination* maps.
+* **Operating system:** Windows, macOS or Linux (tested on macOS 15).
+* **MATLAB:** R2020a or newer (the scripts use `exportgraphics`; tested on
+  R2025b).
+* **Required toolbox:** Statistics and Machine Learning Toolbox, for
+  `fitrm` / `ranova` (repeated-measures ANOVAs), `ttest` and `corr`.
 
-On each trial four computer-graphics objects are shown — a left pair and a right
-pair rendered under two different lighting environments. Three objects share a
-diffuse reflectance; the fourth (the target) differs. Observers find the target
-in an "odd-one-out" task.
+No other toolbox is needed and nothing has to be downloaded: every helper
+function is bundled in [`utils/`](utils/), including Stephen Cobeldick's
+`brewermap` (BSD licence, see the file header).
 
-- **Experiment 1** — how do *specularity* (matte vs glossy) and the presence of a
-  *surrounding context* affect constancy under complex illumination?
-- **Experiment 2** — does constancy survive when the surround is deliberately made
-  *uninformative* about the light falling on the objects?
-
-Seven observers completed both experiments. Alongside the human data we run
-**computational observer models** that estimate a single, global illuminant from
-the image (mean chromaticity, brightest pixel, luminance-weighted mean
-chromaticity), apply a diagonal (von Kries) correction, and are corrupted by
-Gaussian internal noise — optionally integrating chromatic statistics over trials
-with a time constant τ. Two of them, the no-correction baseline and the
-object-based estimators, never look at the surround, so the conditions with and
-without one are the same condition for them; `run_simulation_exp1.m` runs each
-once and writes the responses to both, rather than redrawing the internal noise
-and inventing a difference.
-
-The headline result: constancy was good and orderly. Difficulty was set by the
-chromatic separation of the two reflectances, and the surrounding context was
-worth 9.4 percentage points at every level of it. Computational observers that
-estimate one illuminant statistic from the surround and apply a diagonal
-correction reached the observers' accuracy — a single-illuminant correction does
-transfer to directionally structured light. It is not, however, what observers
-used: when the surround was made uninformative about the light on the objects,
-observers lost 5.1 percentage points and the best of those models lost 44.2,
-falling to chance.
-
-## Getting the data
-
-`data/` and `results/` are **not** tracked in git: together they run to about
-4 GB, most of it rendered multispectral stimuli. The archive is available at
-
-> *(DOI to be added on publication — the dataset will be deposited on Zenodo.)*
-
-Unpack it so that the repository root contains `data/`, i.e.
+## 2. Installation
 
 ```
-reflectance_identification/
-├── data/human/exp1, data/human/exp2      raw observer responses
-├── data/stimuli/exp1, data/stimuli/exp2  rendered multispectral stimuli
-├── data/environments/                    environmental illumination maps
-└── src/, main.m, ...                     (this repository)
+git clone https://github.com/takuma929/reflectance_identification.git
 ```
 
-`results/` is created by `main.m`; you do not need to download it.
+No build step. Every script resolves its paths relative to its own location
+and adds `utils/` to the path, so it can be run from any working folder.
 
-## Quick start
+## 3. Regenerate all figures
 
-With `data/` in place, from the repository root in MATLAB:
+In MATLAB, make the repository the current folder and run:
 
 ```matlab
-main            % compute scores, run the control analysis, redraw every figure
+run_all
 ```
 
-Other entry points:
+This runs every figure script in turn and writes the panels into `figs/`. The
+Command Window reports, for each figure, the statistics quoted in the paper
+(means and standard errors, ANOVA F and p values, t tests, correlations).
+The full set takes a few minutes.
+
+To regenerate a single figure, run its script by name, e.g.
 
 ```matlab
-main(true)          % also rerun the model simulations (slow; uses parfor)
-main(false, false)  % reuse an existing results/, only redraw the figures
+fig7_human_performance_exp1
 ```
 
-Starting from `data/` alone, `main` takes roughly an hour, most of it in the
-model simulations and the permutation test; afterwards `main(false, false)`
-redraws everything in seconds.
+## 4. Figure scripts
 
-Each figure script also **prints the statistics reported for that figure**
-(means ± SE, repeated-measures ANOVA F/p, Spearman ρ between model and observer
-pair matrices) to the MATLAB console, so the numbers in the manuscript can be
-checked directly against the output.
+| Script | Figure | Content |
+| --- | --- | --- |
+| `fig1_environment.m` | 1 | Chromatic distributions of the four environmental illuminations |
+| `fig2_reflectance.m` | 2 | Chromaticities and spectra of the test reflectances |
+| `fig4_procedure.m` | 4 | Stimulus presentation on one trial (Experiment 1) |
+| `fig5_gaussian_noise.m` | 5 | Internal-noise inset of the model schematic |
+| `fig7_human_performance_exp1.m` | 7 | Experiment 1 human performance: overall, across sessions, per reflectance pair, by hue separation |
+| `fig8_model_accuracy_exp1.m` | 8 | Experiment 1 model accuracy and the pair matrices of the best models |
+| `fig9_exp2_stimuli.m` | 9 | Example presentations of Experiment 2 |
+| `fig10_human_performance_exp2.m` | 10 | Experiment 2 human performance, congruent vs incongruent |
+| `fig11_model_accuracy_exp2.m` | 11 | Experiment 2: cost of an uninformative surround for observers and models |
 
-## Requirements
+**Figure 3** (overview of all stimuli) and **Figure 6** and the viewing-angle
+panels of **Figure 9** (scene geometry) are made from the full set of rendered
+stimuli, which is not distributed because of its size (several GB); the
+remaining panels of Figure 5 are a hand-drawn schematic. These have no script
+here.
 
-- **MATLAB** — originally developed with R2016b; verified on R2025b.
-- **Statistics and Machine Learning Toolbox** — `fitrm` / `ranova` for the
-  repeated-measures ANOVAs.
-- [**brewermap**](https://github.com/DrosteEffect/BrewerMap) — bundled in
-  `src/functions/vendor/`, so no separate install is needed; `main` puts `src/`
-  (and its `vendor/`) on the path automatically.
-- *Re-rendering the stimuli* (not needed for any analysis) additionally requires
-  Blender, Mitsuba 0.5 and RenderToolbox4 — see
-  `src/plotting/plot_fig3_all_stimuli.m`.
+## 5. Data
 
-## Reproducing the analysis
+[`data/`](data/) holds everything the figure scripts read. The rendered
+stimuli and the trial-by-trial model simulations are not included; the model
+results enter through the performance matrices in `data/scores/`.
 
-The pipeline has three stages, wrapped by `main.m`:
+### 5.1 Human responses (`data/human/`)
 
-```
- data/stimuli + data/human
-        │
-        ▼   run_simulation_exp{1,2}          (optional; hours, parfor)
- results/model/            per-trial responses of every model observer
-        │
-        ▼   compute_scores_exp{1,2}
- results/scores/           performance matrices + human-vs-model trial scores
- results/matrix_images/    per-condition performance-matrix images
-        │
-        ▼   plot_fig<N>_* scripts
- figs/                     vector PDF + 600-dpi PNG per figure
-```
+Seven observers (`akh`, `jh`, `ly`, `ms`, `sr`, `td`, `tm`), four sessions per
+condition. One file per observer, condition and session:
 
-Neither `data/` nor `results/` is tracked in git (see
-[Getting the data](#getting-the-data)). `results/` is produced entirely by
-`main.m`, so once it exists locally, `main(false, false)` redraws every figure in
-seconds; use `main(true)` only to regenerate `results/model/` from scratch.
+* Experiment 1: `data/human/exp1/bumpy_<specularity>_<context>_session<1-4>_<observer>.mat`
+* Experiment 2: `data/human/exp2/potato_<specularity>_<context>_<difmin|difmax>_session<1-4>_<observer>.mat`
 
-## Manuscript figure map
+with `<specularity>` = `matte` or `shiny`, `<context>` = `nocontext` or
+`context` (without / with the surrounding context), and for Experiment 2
+`difmin` = congruent and `difmax` = incongruent viewing angle. Each file holds
+one struct `result`, one row per trial (144 trials in Experiment 1, 40 in
+Experiment 2):
 
-`src/plotting/` holds exactly one script per manuscript figure, named
-`plot_fig<N>_*.m` (minimal "mean + individual observers" style; light-grey axes;
-two-column 17.8 cm / one-column 8.9 cm sizing defined centrally in
-`src/functions/fig_parameters.m`).
+| Field | Size | Description |
+| --- | --- | --- |
+| `HueCombination` | N × 3 | Reflectance index of the target, of the distractor, and the environment (1 or 2) under which the target was shown. In Experiment 1 indices 1–8 are the hue directions 0°:45°:315° and 9 is the neutral reflectance. |
+| `ansIndex` | N × 1 | Position of the target: 1 and 2 are the upper and lower object of the pair under environment 1, 3 and 4 those of the pair under environment 2 |
+| `response` | N × 1 | The observer's choice, same coding as `ansIndex` |
+| `correct` | N × 1 | 1 if `response` equals `ansIndex`, else 0 |
+| `pattern` | N × 1 | Experiment 2 only: 1 if the target was the upper object of its pair, 2 if the lower |
 
-| Fig. | Content | Script |
-|-----|---------|--------|
-| 1  | Environmental illuminations & chromatic distributions | `plot_fig1_environment.m` |
-| 2  | Surface reflectances | `plot_fig2_reflectance.m` |
-| 3  | Overview of all rendered stimuli | `plot_fig3_all_stimuli.m` *(needs Mitsuba)* |
-| 4  | Trial procedure | `plot_fig4_procedure.m` |
-| 5  | Model flow schematic | *(illustration; `plot_fig5_gaussian_noise.m` draws the internal-noise inset)* |
-| 6  | Exp 1 viewing angles | `plot_fig6_viewing_angles.m` *(needs external data)* |
-| 7a-d | Exp 1 human performance: overall (a, with the no-correction model), learning across sessions (b), per reflectance pair (c), hue separation (d) | `plot_fig7_human_performance_exp1.m` |
-| 8  | Exp 1 model accuracy; what gloss is worth to a model; pair matrices of the accuracy-matching models | `plot_fig8_model_accuracy_exp1.m` |
-| 9  | Exp 2 viewing angles and example presentations | `plot_fig6_viewing_angles.m` *(needs external data)* + `plot_fig9_exp2_stimuli.m` |
-| 10 | Exp 2 human performance + ANOVA, with pair matrices | `plot_fig10_human_performance_exp2.m` |
-| 11 | Exp 2 cost of an uninformative surround, with the congruent-estimate model's pair matrices | `plot_fig11_model_accuracy_exp2.m` |
+### 5.2 Performance matrices (`data/scores/`)
 
-`main` runs all of these except Figure 3 (which re-renders the stimuli and needs
-Mitsuba) and Figure 6/9's viewing-angle panels, which are drawn only when
-`data/external/` is present.
+The scored performance of every observer and every computational observer
+model, as read by Figures 7, 8, 10 and 11. File names:
 
-## Repository layout
+* Experiment 1: `data/scores/exp1/m_<specularity>_<context>_<who>_chromaticity.mat`
+* Experiment 2: `data/scores/exp2/m_<specularity>_<context>_<who>_chromaticity_<min|max>.mat`
+  (`min` = congruent, `max` = incongruent)
 
-```
-main.m                       one-click wrapper (recompute + redraw everything)
-data/
-  human/{exp1,exp2}          raw human responses (7 observers; irreplaceable)
-  stimuli/{exp1,exp2}        rendered stimuli as MacLeod–Boynton images (.mat)
-  stimuli/all_hues           per-hue renders for the stimulus-overview figure
-  config/                    thresholds, environment variance, seeds, misc inputs
-  environments/              MB/RGB images of the four illumination maps
-  procedure/                 renders used for the procedure figure
-  rendering/                 blend scenes + reflectance spectra (.spd)
-  thresholds_morimoto2018/   discrimination thresholds from Morimoto et al. (2018)
-  figure_assets/             object icons composited into figures
-  external/                  large renders not bundled — see "Large external data"
-src/
-  functions/                 color conversions, model observers, figure styling
-  functions/vendor/          third-party helpers (brewermap, ticklengthcm, …)
-  analysis/                  run_simulation_exp{1,2}, compute_scores_exp{1,2}
-  plotting/                  plot_fig<N>_*.m, one script per paper figure
-results/
-  model/{exp1,exp2}          simulated model responses per trial (regenerable)
-  scores/{exp1,exp2}         performance matrices + human-vs-model scores
-  matrix_images/{exp1,exp2}  per-condition performance-matrix images
-figs/                        generated figures (vector PDF + 600-dpi PNG)
-```
+`<who>` is an observer code or a model name. Models are named
+`<estimator>_tau<τ>_noise25`, where the estimator of the illuminant is one of
 
-All data and result **file names are lowercase**; the code and directories use
-`snake_case`.
+| Estimator | Statistic | Taken from |
+| --- | --- | --- |
+| `mean_history` | mean chromaticity | surround |
+| `brightest_history` | chromaticity of the brightest pixels | surround |
+| `wmean_history_w<1,3,5>` | luminance-weighted mean chromaticity, weight exponent 1, 3 or 5 | surround |
+| `meanacrssobj_history`, `brightestacrssobj_history`, `wmeanacrssobj_history_w<1,3,5>` | the same three statistics | the objects themselves |
+| `null` | no correction | – |
+| `congruent100`, `congruent0` | Experiment 2 only: a fixed estimate taken from the congruent (`100`) or incongruent (`0`) surround and applied on every trial | surround |
 
-## Large external data
+`tau` is the time constant (in trials) over which the statistic is integrated
+across preceding trials (`tau0` = current trial only, `tauinf` = all trials),
+and `noise25` is the internal-noise level used in the paper. Each file holds
+`OverallPercentageCorrect` and a struct `M`:
 
-The camera-angle renders used by `plot_viewing_angles.m`
-(`E3E4_AllAnglewithMirrorMB`, ~1.2 GB) are too large to bundle. Copy the folder
-from the archive repository `Paper_RefIdentification` into `data/external/` so the
-files resolve at
-`data/external/E3E4_AllAnglewithMirrorMB/En3_cameraYRot0_…mat`. When the folder
-is absent, `main` skips `plot_viewing_angles` and reports that it did so; all
-other figures still build.
+| Field | Size | Description |
+| --- | --- | --- |
+| `CorrectN`, `TrialN` | 9 × 9 × 4 | Correct and scored trials per target reflectance (row) × distractor reflectance (column) × session. A trial is scored only if the chosen object lay in the correct pair |
+| `CorrectN_SessionSum`, `TrialN_SessionSum` | 9 × 9 | The same summed over sessions |
+| `InCorrectN`, `InCorrectN_SessionSum` | 9 × 9 (× 4) | Trials in which the wrong pair was chosen |
+| `PercentageCorrect` | 9 × 9 | `CorrectN_SessionSum ./ TrialN_SessionSum` |
+| `PercentageInCorrect` | 9 × 9 | Proportion of wrong-pair trials |
 
-## A note on naming
+### 5.3 Other inputs
 
-The two experiments were called "Exp3_1" and "Exp3_2" during data collection.
-Data **file** names (e.g. `potato_…_exp3_2.mat`) keep that historical suffix,
-while all code and directories use `exp1` / `exp2`.
+| File | Used by | Content |
+| --- | --- | --- |
+| `data/environments_mb.mat` | Fig. 1 | `MB_En1` … `MB_En4`: 512 × 1024 × 3 MacLeod–Boynton images (L/(L+M), S/(L+M), luminance) of the four light probes |
+| `data/blackbody_locus.mat` | Fig. 1 | `bbl`: MacLeod–Boynton chromaticities of blackbody radiators, 100 K to 10⁶ K |
+| `data/allsurfaces.mat` | Fig. 2 | `ALLSURFACES`: 4,824 natural-object reflectance spectra, 400:10:700 nm |
+| `data/thresholds_morimoto2018.mat` | Fig. 2 | `threshold`: discrimination thresholds of Morimoto et al. (2018), observer × specularity × environment × session × hue (3 × 2 × 2 × 5 × 8), in mixture-level units; the labels of each dimension are stored alongside |
+| `data/procedure/*.mat` | Fig. 4 | Four renders (`MB` images) used to draw the trial procedure |
+| `data/stimuli_exp2/*.mat` | Fig. 9 | Eight example renders (`MB` images) of Experiment 2 |
+| `utils/lms_400to700.mat` | Fig. 2 | Cone fundamentals used by `spectrum_to_mb_rgb` |
 
-## Data availability
+## 6. Citation
 
-The stimuli, individual observer responses, and analysis and figure-generation
-code are openly available in this repository:
-<https://github.com/takuma929/ReflectanceIdentificationAcrossEnvironmentalIlluminations>
-
-## License
-
-Code is released under the [MIT License](LICENSE) © 2021 Takuma Morimoto.
-
-## Citation
-
-If you use this code or data, please cite the paper (details will be updated on
+If you use this code or data, please cite the paper (details will be added on
 publication) and this repository.
+
+## 7. License
+
+Released under the [MIT License](LICENSE).

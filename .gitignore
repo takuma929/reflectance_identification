@@ -1,44 +1,17 @@
-# OS junk
+# OS and editor files
 .DS_Store
 ._*
-
-# MATLAB
 *.asv
 *.m~
-
-# Word lock files
 ~$*
 
-# ---------------------------------------------------------------------------
-# Data and results are not distributed through git.
-#
-# data/    ~3.8 GB of rendered stimuli, environmental illumination maps and raw
-#          human responses. Archived separately (see README) because it far
-#          exceeds what a GitHub repository should hold.
-# results/ regenerated from data/ by main.m; results/model/ alone is ~13,500
-#          files, and nothing in here is a source of truth.
-# figs/    regenerated from results/ by the plot_* scripts.
-# ---------------------------------------------------------------------------
-data/
-results/
+# Generated figures (run_all.m rebuilds them)
 figs/
 
-# Working copy of the raw data taken before the nocontext/context rename
-data_backup_before_rename/
-rename_bg_to_context.log.json
-
-# The manuscript and everything used to build it stay local until publication:
-# the drafts themselves, the figures embedded in them, the pandoc build scripts,
-# and doc/refs/ (unpublished manuscripts by other people, kept only as writing-
-# style references - these must never be published with this repo).
+# Local material that is not part of the published code: manuscript drafts,
+# the full stimulus set, the model simulations and superseded scripts.
 doc/
-
-# Internal working record of the 2026 repository reorganisation, written for
-# us rather than for readers of the published code.
-PLAN.md
-
-# Superseded material kept locally for reference only: the retired
-# LaTeX/Overleaf version of the paper with its figures, and the pre-
-# reorganisation scripts. None of it is needed to reproduce the analysis, and
-# publishing it would only invite confusion with the current code.
 legacy/
+data_backup_before_rename/
+PLAN.md
+.claude/
